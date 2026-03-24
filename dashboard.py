@@ -44,7 +44,7 @@ div[data-testid="stMetric"] {
     background: linear-gradient(145deg, #111640 0%, #0d1230 100%);
     border: 1px solid rgba(37, 99, 235, 0.12);
     border-radius: 14px;
-    padding: 22px 20px;
+    padding: 16px 12px;
     box-shadow: 0 4px 24px rgba(0,0,0,0.4);
     transition: all 0.35s cubic-bezier(.4,0,.2,1);
 }
@@ -55,15 +55,28 @@ div[data-testid="stMetric"]:hover {
 }
 div[data-testid="stMetric"] label {
     color: #7c8db5 !important;
-    font-size: 0.72rem !important;
+    font-size: 0.65rem !important;
     font-weight: 600 !important;
-    letter-spacing: 1px;
+    letter-spacing: 0.5px;
     text-transform: uppercase;
+    white-space: normal !important;
+    overflow: visible !important;
+    text-overflow: clip !important;
+}
+div[data-testid="stMetric"] label > div {
+    white-space: normal !important;
+    overflow: visible !important;
 }
 div[data-testid="stMetric"] [data-testid="stMetricValue"] {
     color: #e8edf5 !important;
     font-weight: 800 !important;
-    font-size: 1.6rem !important;
+    font-size: 1.35rem !important;
+    white-space: normal !important;
+    overflow: visible !important;
+}
+div[data-testid="stMetric"] [data-testid="stMetricValue"] > div {
+    white-space: normal !important;
+    overflow: visible !important;
 }
 div[data-testid="stMetric"] [data-testid="stMetricDelta"] svg { display: none; }
 
@@ -276,6 +289,15 @@ fdf["stressed_EL"] = fdf["stressed_prob"] * lgd * ead
 fdf["stressed_bucket"] = pd.cut(fdf["stressed_prob"], bins=[0, 0.3, 0.6, 1.0], labels=["Low", "Medium", "High"])
 
 # =============================================
+# FORMATTER HELPER
+# =============================================
+def fmt_val(val, is_currency=False):
+    if val >= 1_000_000_000: return f"Rs {val/1_000_000_000:.1f}B" if is_currency else f"{val/1_000_000_000:.1f}B"
+    if val >= 1_000_000: return f"Rs {val/1_000_000:.1f}M" if is_currency else f"{val/1_000_000:.1f}M"
+    if val >= 1_000: return f"Rs {val/1_000:.1f}K" if is_currency else f"{val/1_000:.1f}K"
+    return f"Rs {val:,.0f}" if is_currency else f"{val:,.0f}"
+
+# =============================================
 # PAGE: OVERVIEW
 # =============================================
 if page == "Overview":
@@ -302,11 +324,11 @@ if page == "Overview":
     total_el = fdf["EL"].sum()
     high_pct = (fdf["risk_bucket"] == "High").mean() * 100 if total > 0 else 0
 
-    c1.metric("Total Loans", f"{total:,}")
-    c2.metric("Defaults", f"{defaults:,.0f}")
-    c3.metric("Default Rate", f"{dr:.1f}%")
-    c4.metric("Avg Risk Score", f"{avg_score:.1f}%")
-    c5.metric("Expected Loss", f"Rs {total_el:,.0f}")
+    c1.metric("Total Loans", fmt_val(total))
+    c2.metric("Defaults", fmt_val(defaults))
+    c3.metric("Def. Rate", f"{dr:.1f}%")
+    c4.metric("Avg Risk", f"{avg_score:.1f}%")
+    c5.metric("Exp. Loss", fmt_val(total_el, True))
     c6.metric("High Risk", f"{high_pct:.1f}%")
 
     st.markdown("<br>", unsafe_allow_html=True)
@@ -446,10 +468,10 @@ elif page == "Stress Testing":
         st.markdown(f"### Scenario: {stress}x Stress Applied")
 
         sc1, sc2, sc3, sc4 = st.columns(4)
-        sc1.metric("Normal Exp. Loss", f"Rs {normal_el:,.0f}")
-        sc2.metric("Stressed Exp. Loss", f"Rs {stressed_el:,.0f}")
+        sc1.metric("Normal Exp. Loss", fmt_val(normal_el, True))
+        sc2.metric("Stressed Exp. Loss", fmt_val(stressed_el, True))
         sc3.metric("Loss Increase", f"+{el_change:.1f}%")
-        sc4.metric("Extra Capital Needed", f"Rs {stressed_el - normal_el:,.0f}")
+        sc4.metric("Extra Capital Needed", fmt_val(stressed_el - normal_el, True))
 
         st.markdown("<br>", unsafe_allow_html=True)
 
@@ -537,7 +559,7 @@ elif page == "Feature Intelligence":
         colorscale=[[0, "#2563eb"], [0.5, "#0a0e27"], [1, "#ef4444"]],
         text=np.round(corr.values, 2), texttemplate="%{text}", textfont={"size": 11, "color": "#8fa3c4"},
         hoverongaps=False,
-        colorbar=dict(title="r", titlefont=dict(color="#8fa3c4"), tickfont=dict(color="#8fa3c4"))
+        colorbar=dict(title=dict(text="r", font=dict(color="#8fa3c4")), tickfont=dict(color="#8fa3c4"))
     ))
     fig.update_layout(**PLOTLY_LAYOUT, height=480, xaxis_tickangle=-45)
     st.plotly_chart(fig, use_container_width=True)
