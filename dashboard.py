@@ -27,6 +27,7 @@ from dataclasses import dataclass
 from datetime import datetime, timedelta
 import io
 import base64
+import pickle
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # LOGGING & CONFIGURATION
@@ -368,9 +369,17 @@ if df_master.empty:
 FEATURE_COLS = ["grade", "int_rate", "all_util", "max_bal_bc",
                 "mths_since_rcnt_il", "total_bal_il", "il_util"]
 
-@st.cache_resource(show_spinner="Training models (one-time, ~15s)...")
+_MODEL_CACHE_PATH = os.path.join(os.path.dirname(__file__), "pretrained_models.pkl")
+
+@st.cache_resource(show_spinner="Loading models...")
 def train_models():
-    """Train all 3 models with same 70/30 split as notebook, compute metrics."""
+    """Load pre-trained models from disk. Falls back to training if file missing."""
+    if os.path.exists(_MODEL_CACHE_PATH):
+        with open(_MODEL_CACHE_PATH, "rb") as f:
+            data = pickle.load(f)
+        return data["xgb"], data["all_metrics"], data["roc_data"]
+
+    # Fallback: train from scratch (only runs if .pkl is missing)
     from sklearn.linear_model import LogisticRegression
     from sklearn.ensemble import RandomForestClassifier
 
@@ -378,7 +387,6 @@ def train_models():
     X = df[FEATURE_COLS].copy()
     y = df["target"]
 
-    # Same split as notebook: 70/30, stratified, random_state=42
     X_train, X_test, y_train, y_test = train_test_split(
         X, y, test_size=0.3, random_state=42, stratify=y
     )
@@ -387,7 +395,6 @@ def train_models():
     neg = len(y_train) - pos
     scale = neg / pos if pos > 0 else 1
 
-    # ── 3 models (same as notebook) ──
     lr = LogisticRegression(class_weight="balanced", max_iter=1000, random_state=42)
     rf = RandomForestClassifier(n_estimators=200, class_weight="balanced", max_depth=12, random_state=42)
     xgb = XGBClassifier(
@@ -416,6 +423,10 @@ def train_models():
         }
 
     all_metrics["_split"] = {"train_size": len(X_train), "test_size": len(X_test)}
+
+    # Save for next time
+    with open(_MODEL_CACHE_PATH, "wb") as f:
+        pickle.dump({"xgb": xgb, "all_metrics": all_metrics, "roc_data": roc_data}, f)
 
     return xgb, all_metrics, roc_data
 
