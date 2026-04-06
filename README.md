@@ -6,15 +6,22 @@ An end-to-end Credit Risk Modeling & Stress Testing System built using real-worl
 
 This project replicates a mini credit risk engine used in banks and fintech companies. It combines:
 
-📊 Predictive Modeling (PD timation) ⚖️ Risk Segmentation 📉 Stress Testinges 💰 Expected Credit Loss (ECL) estimation 🖥️ Interactive dashboard (Streamlit) 🧠 Key Features 🔹 1. Credit Risk Modeling Built classification models: Logistic Regression Random Forest XGBoost Evaluated using: ROC-AUC KS Statistic Precision / Recall / F1
+📊 Predictive Modeling (PD timation) ⚖️ Risk Segmentation 📉 Stress Testinges 💰 Expected Credit Loss (ECL) estimation 🖥️ Interactive dashboard (Streamlit) 🧠 Key Features
+
+🔹 1. Credit Risk Modeling Built classification models: Logistic Regression Random Forest XGBoost Evaluated using: ROC-AUC KS Statistic Precision / Recall / F1
 
 👉 Final model selected based on performance and business relevance
 
-🔹 2. Feature Engineering (Risk-Oriented) WOE (Weight of Evidence) transformation Information Value (IV) based feature selection Handling class imbalance Leakage-aware modeling 🔹 3. Risk Segmentation Converted model probabilities into: Low Risk Medium Risk High Risk
+🔹 2. Feature Engineering (Risk-Oriented) WOE (Weight of Evidence) transformation Information Value (IV) 
+based feature selection Handling class imbalance Leakage-aware modeling
+
+🔹 3. Risk Segmentation Converted model probabilities into: Low Risk Medium Risk High Risk
 
 👉 Enables decision-making for lending policies
 
-🔹 4. Stress Testing (What-if Scenarios) Simulated adverse economic conditions using: PD scaling (stress multiplier) Observed: Risk migration across buckets Increase in default probabilities 🔹 5. Expected Credit Loss (ECL) Implemented simplified IFRS 9 framework: 𝐸𝐶𝐿=𝑃𝐷×𝐿𝐺𝐷×𝐸𝐴𝐷
+🔹 4. Stress Testing (What-if Scenarios) Simulated adverse economic conditions using: PD scaling (stress multiplier) Observed: Risk migration across buckets Increase in default probabilities
+
+🔹 5. Expected Credit Loss (ECL) Implemented simplified IFRS 9 framework: 𝐸𝐶𝐿=𝑃𝐷×𝐿𝐺𝐷×𝐸𝐴𝐷
 
 Adjustable parameters: PD (via stress multiplier) LGD (Loss Given Default) EAD (Exposure at Default)
 
